@@ -1,8 +1,9 @@
 const socket = io('http://ec2-100-25-171-192.compute-1.amazonaws.com:3000/')
 const videoGrid = document.getElementById('video-grid')
 const myPeer = new Peer(undefined, {
-  host: 'http://ec2-100-25-171-192.compute-1.amazonaws.com',
-  port: '3001'
+  host: 'c2-100-25-171-192.compute-1.amazonaws.com',
+  port: '3001',
+  secure: false,
 })
 const myVideo = document.createElement('video')
 myVideo.muted = true
