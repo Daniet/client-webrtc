@@ -1,30 +1,69 @@
-
 <!DOCTYPE html>
-<html lang="en">
+  <html lang="en">
   <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <script>
-      const ROOM_ID = "7b514b46-d7f3-4875-afe5-06cdbf54a7b3";
-    </script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/2.3.1/socket.io.js" defer></script>
-    <script src="https://unpkg.com/peerjs@1.3.1/dist/peerjs.min.js" defer></script>
-    <script src="script.js" defer></script>
     <title>Document</title>
-    <style type="text/css">
+    <style>
       video {
-        width: 100%;
-        height: 100%;
-        object-fit: cover;
-      }
-      #video-grid {
-        display: grid;
-        grid-template-columns: repeat(auto-fill, 300px);
-        grid-auto-rows: 300px;
+        max-width: 100%;
+        height: auto;
       }
     </style>
   </head>
   <body>
-    <div id="video-grid"></div>
+    <h3 id="show-peer"></h3>
+    <div style="display: flex; justify-content: space-around; margin: 10px">
+      <div style="width:400px; height: 300px; border: 2px solid" id="ourVideo"></div>
+      <div style="width:400px; height: 300px; border: 2px solid" id="remoteVideo"></div>
+    </div>
+    <input id="peerID" placeholder="peer id">
+    <button  id="call-peer">Call peer</button>
+    <br>
+    <Button onclick="shareScreen()">Share screen</Button>
+    <script src="https://unpkg.com/peerjs@1.3.1/dist/peerjs.min.js" defer></script>
+    <script>
+      window.addEventListener('load', (event) => {
+        let peer = new Peer()
+        let myStream
+        peer.on('open', function(id) {
+          document.querySelector('#show-peer').innerHTML = id
+        })
+        peer.on('call', function(call){
+          navigator.mediaDevices.getUserMedia({ video: true, audio: true }).then(stream => {
+            myStream = stream
+            call.answer(stream)
+            call.on('stream', function(remoteStream){
+              addRemoteVideo(remoteStream)
+            })
+          }).catch(err => {
+            console.log(err)
+          })
+        })
+        document.getElementById('call-peer').addEventListener('click', (event) =>{
+          let remotePeerId = document.getElementById('peerID').value
+          document.getElementById('show-peer').innerHTML = `connecting ${remotePeerId}`
+          callPeer(remotePeerId)
+        })
+        function callPeer(id){
+          navigator.mediaDevices.getUserMedia({video: true, audio: true}).then(stream =>{
+            myStream = stream
+            let call = peer.call(id, stream)
+            call.on('stream', function(remoteStream){
+              addRemoteVideo(remoteStream)
+            })
+          }).catch(err => {
+            console.log(err)
+          })
+        }
+
+        function addRemoteVideo(stream) {
+          let video = document.createElement('video')
+          video.srcObject = stream
+          video.play()
+          document.getElementById('remoteVideo').append(video)
+        }
+      })
+    </script>
   </body>
 </html>
